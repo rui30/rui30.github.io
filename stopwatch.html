@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #timer {
+            width: 460px;
+            font-size: 70px;
+            background-color: black;
+            color: limegreen;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        #labels {
+            margin-top: -25px;
+            color: limegreen;
+            font-size: 12px;
+        }
+
+        #hh {
+            margin-left: 45px;
+        }
+
+        #mm {
+            margin-left: 80px;
+        }
+
+        #ss {
+            margin-left: 70px;
+        }
+
+        #ms {
+            margin-left: 45px;
+        }
+
+        #controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #start-pause {
+            width: 70px;
+        }
+
+        #count {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 22px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="timer">00:00:00:00</div>
+        <div id="labels">
+            <span id="hh">Hours</span>
+            <span id="mm">Minutes</span>
+            <span id="ss">Seconds</span>
+            <span id="ms">Milliseconds</span>
+        </div>
+        <div id="controls">
+            <button id="start-pause">Start</button>
+            <button id="restart">Restart</button>
+            <button id="reset">Reset</button>
+            <div id="count">Count: 0</div>
+        </div>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval;
+        let isRunning = false;
+        let count = 0;
+
+        let display = document.querySelector("#timer");
+        let startPauseButton = document.querySelector("#start-pause");
+        let restartButton = document.querySelector("#restart");
+        let resetButton = document.querySelector("#reset");
+        let countDisplay = document.querySelector("#count");
+
+        function updateDisplay(time) {
+            let hours = String(Math.floor(time / 3600000)).padStart(2, "0");
+            let minutes = String(Math.floor((time % 3600000) / 60000)).padStart(2, "0");
+            let seconds = String(Math.floor((time % 60000) / 1000)).padStart(2, "0");
+            let milliseconds = String(Math.floor(time % 1000 / 10)).padStart(2, "0");
+            let formattedTime = `${hours}:${minutes}:${seconds}:${milliseconds}`;
+            display.textContent = formattedTime;
+            document.title = formattedTime.split(":").slice(1, 3).join(":");
+        }
+
+        function startTimer() {
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                updateDisplay(elapsedTime);
+            }, 10);
+            isRunning = true;
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+        }
+
+        function restartTimer() {
+            count++;
+            countDisplay.textContent = `Count: ${count}`;
+            elapsedTime = 0;
+            updateDisplay(elapsedTime);
+            startTimer();
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            updateDisplay(elapsedTime);
+            isRunning = false;
+            startPauseButton.textContent = "Start";
+            count = 0;
+            countDisplay.textContent = `Count: ${count}`;
+        }
+
+        function startPause() {
+            if (isRunning) {
+                pauseTimer();
+                startPauseButton.textContent = "Start";
+            } else {
+                startTimer();
+                startPauseButton.textContent = "Pause";
+            }
+        }
+
+        function restart() {
+            if (isRunning) {
+                pauseTimer();
+                restartTimer();
+            } else {
+                restartTimer();
+                startPauseButton.textContent = "Pause";
+            }
+        }
+
+        startPauseButton.addEventListener("click", startPause);
+        restartButton.addEventListener("click", restart);
+        resetButton.addEventListener("click", resetTimer);
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "1":
+                    startPause();
+                    break;
+                case "2":
+                    restart();
+                    break;
+                case "0":
+                    resetTimer();
+                    break;
+                default:
+                    break;
+            }
+        });
+    </script>
+</body>
+
+</html>

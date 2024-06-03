@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search 2.0</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            font-size: large;
+        }
+
+        .research-links,
+        .tencent-information {
+            width: 500px;
+        }
+
+        #output {
+            border: 1px solid black;
+            height: 300px;
+            width: 700px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Relevance</h1>
+    <label><input type="checkbox" class="relevance-option" value="Relevance: Good, ">Relevance: <b>Good</b></label><br>
+    <label><input type="checkbox" class="relevance-option" value="Relevance: Acceptable, ">Relevance:<b>Acceptable</b></label><br>
+    <label><input type="checkbox" class="relevance-option" value="Relevance: Bad, ">Relevance: <b>Bad</b></label><br>
+    <label><input type="checkbox" class="relevance-option" value="this result is ">this result is</label>
+    <label><input type="checkbox" class="relevance-option" value="a bit further ">a bit further</label>
+    <label><input type="checkbox" class="relevance-option" value="far ">far</label>
+    <label><input type="checkbox" class="relevance-option" value="from the viewport.">from the viewport.</label>
+    <label><input type="checkbox" class="relevance-option" value="from the user's location.">from the user's location.</label>
+    <br>
+    <label><input type="checkbox" class="relevance-option" value="this result does not match the user's query intent.">this result does not match the user's query intent.</label>
+
+    <h1>Research Sources</h1>
+    <table id="research-sources">
+        <tr>
+            <td>Baidu:</td>
+            <td><input type="text" class="research-links" id="baidu-url" data-name="Baidu: "></td>
+            <td><label><input type="checkbox" class="url-not-found" value="baidu-url">Not found?</td></label>
+        </tr>
+        <tr>
+            <td>Tencent:</td>
+            <td><input type="text" class="research-links" id="tencent-url" data-name="Tencent: "></td>
+            <td><label><input type="checkbox" class="url-not-found" value="tencent-url">Not found?</td></label>
+        </tr>
+        <tr>
+            <td>Dianping:</td>
+            <td><input type="text" class="research-links" id="dianping-url" data-name="Dianping: "></td>
+            <td><label><input type="checkbox" class="url-not-found" value="dianping-url">Not found?</td></label>
+        </tr>
+        <tr>
+            <td>Tianditu:</td>
+            <td><input type="text" class="research-links" id="tianditu-url" data-name="Tianditu: "></td>
+            <td><label><input type="checkbox" class="url-not-found" value="tianditu-url">Not found?</td></label>
+        </tr>
+        <tr>
+            <td>Tencent Name:</td>
+            <td><input type="text" class="tencent-information" id="tencent-name"></td>
+        </tr>
+        <tr>
+            <td>Tencent Address:</td>
+            <td><input type="text" class="tencent-information" id="tencent-address"></td>
+        </tr>
+    </table>
+    <div><button id="get-links-from-clipboard">Get links from clipboard</button></div>
+
+    <h1>Corrections</h1>
+    <label><input type="checkbox" class="corrections-option" value="Name: ">Name:</label>
+    <label><input type="checkbox" class="corrections-option" value="Partially Correct. The correct name is: ">Partially Correct</label>
+    <label><input type="checkbox" class="corrections-option" value="Can't Verify, no fully consistent names. ">Can't Verify</label>
+    <input type="text" class="corrections-option"><br>
+    <label><input type="checkbox" class="corrections-option" value="Address: ">Address:</label>
+    <label><input type="checkbox" class="corrections-option" value="Incorrect. The correct address is: ">Incorrect</label>
+    <label><input type="checkbox" class="corrections-option" value="Can't Verify, no fully consistent address information. ">Can't Verify</label>
+    <input type="text" class="corrections-option"><br>
+    <label><input type="checkbox" class="corrections-option" value="Pin: ">Pin:</label>
+    <label><input type="checkbox" class="corrections-option" value="Approximate">Approximate</label>
+    <label><input type="checkbox" class="corrections-option" value="Incorrect">Incorrect</label><br>
+    <label><input type="checkbox" class="corrections-option" value="Only found on , could not be found on other resources, the rating of name, address, and the pin is Can't Verify.">Only found</label>
+    <label><input type="checkbox" class="corrections-option" value="Not found on all resources, the rating of name, address, and the pin is Can't Verify.">Not found on all</label>
+
+    <h1>Generation</h1>
+    <textarea id="output"></textarea>
+    <div>
+        <button id="generate">Generate Text</button>
+        <button id="clear-text">Clear the text</button>
+        <button id="copy">Copy</button>
+    </div>
+
+    <script>
+        let content = [];
+
+        function relevanceGeneration() {
+            document.querySelectorAll(".relevance-option").forEach(checkbox => {
+                if (checkbox.checked) {
+                    content.push(checkbox.value);
+                }
+            });
+
+            content.push("\n");
+        }
+
+        function linksGeneration() {
+            document.querySelectorAll(".research-links").forEach(input => {
+                if (input.value != "") {
+                    content.push(input.dataset.name);
+                    content.push(input.value);
+                    content.push("\n");
+                }
+            });
+        }
+
+        function correctionsGeneration() {
+            document.querySelectorAll(".corrections-option").forEach(input => {
+                if (input.type == "checkbox") {
+                    if (input.checked) {
+                        content.push(input.value);
+                    }
+
+                } else if (input.type == "text") {
+                    if (input.value != "") {
+                        content.push(input.value);
+                        content.push(".\n");
+                    }
+                }
+            });
+        }
+
+        async function analyzeClipboardContent() {
+            try {
+                let text = await navigator.clipboard.readText();
+
+                let baiduPattern = /https:\/\/j\.map\.baidu\.com\/[a-zA-Z0-9/]+/;
+                let tencentPattern = /分享位置：(.*?)（(.*?)）\s*(https:\/\/mmapgwh\.map\.qq\.com\/shortlink\/short\?l=[a-f0-9]+)/;
+                let dianpingPattern = /https:\/\/www\.dianping\.com\/shop\/[a-zA-Z0-9]+/;
+                let tiandituPattern = /https:\/\/map\.tianditu\.gov\.cn\/share\/[a-zA-Z0-9]+/;
+
+                if (baiduPattern.test(text)) {
+                    document.querySelector("#baidu-url").value = text.match(baiduPattern)[0];
+                } else if (tencentPattern.test(text)) {
+                    let match = text.match(tencentPattern);
+                    document.querySelector("#tencent-url").value = match[3];
+                    document.querySelector("#tencent-name").value = match[1];
+                    document.querySelector("#tencent-address").value = match[2];
+                } else if (dianpingPattern.test(text)) {
+                    document.querySelector("#dianping-url").value = text.match(dianpingPattern)[0];
+                } else if (tiandituPattern.test(text)) {
+                    document.querySelector("#tianditu-url").value = text.match(tiandituPattern)[0];
+                } else {
+                    console.log("No matching content found in clipboard.");
+                }
+            } catch (err) {
+                console.error("Failed to read clipboard contents: ", err);
+            }
+        }
+
+        function generate() {
+            relevanceGeneration();
+            linksGeneration();
+            correctionsGeneration();
+
+            document.querySelector("#output").value = content.join("");
+        }
+
+        function copyToClipboard() {
+            let text = document.querySelector("#output");
+
+            text.select();
+            text.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+        }
+
+        document.querySelectorAll(".url-not-found").forEach(checkbox => {
+            checkbox.addEventListener("click", () => {
+                if (checkbox.checked) {
+                    document.querySelector(`#${checkbox.value}`).value = "Not found.";
+                } else {
+                    document.querySelector(`#${checkbox.value}`).value = "";
+                }
+            });
+        });
+
+        document.querySelector("#get-links-from-clipboard").addEventListener("click", analyzeClipboardContent);
+
+        document.querySelector("#generate").addEventListener("click", generate);
+
+        document.querySelector("#clear-text").addEventListener("click", () => {
+            document.querySelector("#output").value = "";
+            content.length = 0;
+        });
+
+        document.querySelector("#copy").addEventListener("click", copyToClipboard);
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key == "p") analyzeClipboardContent();
+            if (event.key == "o") generate();
+            if (event.key == "y") copyToClipboard();
+        });
+    </script>
+</body>
+
+</html>
