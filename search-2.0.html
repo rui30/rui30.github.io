@@ -16,7 +16,7 @@
 
         .research-links,
         .tencent-information {
-            width: 500px;
+            width: 580px;
         }
 
         #output {
@@ -75,16 +75,17 @@
 
     <h1>Corrections</h1>
     <label><input type="checkbox" class="corrections-option" value="Name: ">Name:</label>
-    <label><input type="checkbox" class="corrections-option" value="Partially Correct. The correct name is: ">Partially Correct</label>
+    <label><input type="checkbox" class="corrections-option" value="Partially Correct. ">Partially Correct</label>
     <label><input type="checkbox" class="corrections-option" value="Can't Verify, no fully consistent names. ">Can't Verify</label>
     <input type="text" class="corrections-option"><br>
     <label><input type="checkbox" class="corrections-option" value="Address: ">Address:</label>
-    <label><input type="checkbox" class="corrections-option" value="Incorrect. The correct address is: ">Incorrect</label>
+    <label><input type="checkbox" class="corrections-option" value="Incorrect. ">Incorrect</label>
     <label><input type="checkbox" class="corrections-option" value="Can't Verify, no fully consistent address information. ">Can't Verify</label>
     <input type="text" class="corrections-option"><br>
     <label><input type="checkbox" class="corrections-option" value="Pin: ">Pin:</label>
     <label><input type="checkbox" class="corrections-option" value="Approximate">Approximate</label>
-    <label><input type="checkbox" class="corrections-option" value="Incorrect">Incorrect</label><br>
+    <label><input type="checkbox" class="corrections-option" value="Wrong">Wrong</label>
+    <label><input type="checkbox" class="corrections-option" value="Can't Verify">Can't Verify</label><br>
     <label><input type="checkbox" class="corrections-option" value="Only found on , could not be found on other resources, the rating of name, address, and the pin is Can't Verify.">Only found</label>
     <label><input type="checkbox" class="corrections-option" value="Not found on all resources, the rating of name, address, and the pin is Can't Verify.">Not found on all</label>
 
@@ -92,21 +93,24 @@
     <textarea id="output"></textarea>
     <div>
         <button id="generate">Generate Text</button>
-        <button id="clear-text">Clear the text</button>
         <button id="copy">Copy</button>
+        <button id="clear-text">Clear Text</button>
+        <button id="clear-all">Clear All</button>
     </div>
 
     <script>
         let content = [];
 
         function relevanceGeneration() {
+            let hasChecked = false;
             document.querySelectorAll(".relevance-option").forEach(checkbox => {
                 if (checkbox.checked) {
                     content.push(checkbox.value);
+                    hasChecked = true;
                 }
             });
 
-            content.push("\n");
+            if (hasChecked) content.push("\n");
         }
 
         function linksGeneration() {
@@ -172,11 +176,23 @@
         }
 
         function copyToClipboard() {
-            let text = document.querySelector("#output");
+            let textElement = document.querySelector("#output");
 
-            text.select();
-            text.setSelectionRange(0, 99999);
-            document.execCommand("copy");
+            if (textElement) {
+                textElement.select();
+                textElement.setSelectionRange(0, 99999);
+
+                document.execCommand("copy");
+            }
+        }
+
+        function clearAll() {
+            document.querySelectorAll("input").forEach(input => {
+                if (input.type == "checkbox") input.checked = false;
+                if (input.type == "text") input.value = "";
+            });
+            document.querySelector("#output").value = "";
+            content.length = 0;
         }
 
         document.querySelectorAll(".url-not-found").forEach(checkbox => {
@@ -190,20 +206,41 @@
         });
 
         document.querySelector("#get-links-from-clipboard").addEventListener("click", analyzeClipboardContent);
-
         document.querySelector("#generate").addEventListener("click", generate);
-
+        document.querySelector("#copy").addEventListener("click", copyToClipboard);
         document.querySelector("#clear-text").addEventListener("click", () => {
             document.querySelector("#output").value = "";
             content.length = 0;
         });
-
-        document.querySelector("#copy").addEventListener("click", copyToClipboard);
+        document.querySelector("#clear-all").addEventListener("click", clearAll);
 
         document.addEventListener("keydown", (event) => {
-            if (event.key == "p") analyzeClipboardContent();
-            if (event.key == "o") generate();
-            if (event.key == "y") copyToClipboard();
+            let activeElement = document.activeElement;
+
+            if (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA" || activeElement.isContentEditable) {
+                return;
+            }
+            if (event.key === "p") {
+                event.preventDefault();
+                analyzeClipboardContent();
+            }
+            if (event.key === "o") {
+                event.preventDefault();
+                generate();
+            }
+            if (event.key === "y") {
+                event.preventDefault();
+                copyToClipboard();
+            }
+            if (event.key === "l") {
+                event.preventDefault();
+                document.querySelector("#output").value = "";
+                content.length = 0;
+            }
+            if (event.key === "c") {
+                event.preventDefault();
+                clearAll();
+            }
         });
     </script>
 </body>
