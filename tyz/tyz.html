@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYZ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <textarea id="inputText" placeholder="Type your text here..."></textarea>
+    <div id="display"></div>
+    <div>
+        <button onclick="changeFontSize(1.1)">Increase Font Size</button>
+        <button onclick="changeFontSize(0.9)">Decrease Font Size</button>
+    </div>
+
+    <script>
+        let inputText = document.getElementById('inputText');
+        let display = document.getElementById('display');
+
+        inputText.addEventListener('input', () => {
+            display.textContent = inputText.value;
+        });
+
+        function changeFontSize(factor) {
+            let currentSize = window.getComputedStyle(display).fontSize;
+            let newSize = parseFloat(currentSize) * factor;
+            display.style.fontSize = newSize + 'px';
+        }
+    </script>
+</body>
+</html>

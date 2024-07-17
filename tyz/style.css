@@ -1,0 +1,37 @@
+@font-face {
+    font-family: 'TYZyingbikai';
+    src: url('./TYZyingbikai.woff2') format('woff2'),
+         url('./TYZyingbikai.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'TYZyingbikai', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+}
+
+textarea {
+    width: 95%;
+    height: 100px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+#display {
+    width: 90%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 32px;
+    white-space: pre-wrap;
+}
+
+button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
